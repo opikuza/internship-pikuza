@@ -1,0 +1,503 @@
+{
+	"info": {
+		"_postman_id": "c766d336-6e2d-4edc-8baa-84ede20c45a8",
+		"name": "End-To-End (quiz)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29257417"
+	},
+	"item": [
+		{
+			"name": "Sign in - Teacher account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Validate user email\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.email).to.eql(\"o.pikuza88+234@gmail.com\");",
+							"});",
+							"",
+							"pm.test(\"User role validation\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.role).to.eql(\"TEACHER\");",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"teacherToken\", jsonData.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"o.pikuza88+234@gmail.com\",\n  \"password\": \"234555\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/sign-in",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create New Quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"quizId\", jsonData.id);",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{teacherToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"API end-to-end quiz\",\n    \"totalScore\": 18,\n    \"passingPercentage\": 75,\n    \"showStopperQuestion\": 1,\n    \"questions\": [\n        {{textual question}},\n        {{single choice question}},\n        {{multiple choicw question}}\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/quiz",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"quiz"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Student ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"studentID\", jsonData[0].id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/users?_where=(email,eq,o.pikuza88@gmail.com)",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"users"
+					],
+					"query": [
+						{
+							"key": "_where",
+							"value": "(email,eq,o.pikuza88@gmail.com)"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Give assignment - T",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"assignmentGroupID\",jsonData[0].assignmentGroupID);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{teacherToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"quizId\": {{quizId}},\n  \"userIds\": [{{studentID}}]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/assignment",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"assignment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Sign in - Student account",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Validate user email\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.email).to.eql(\"o.pikuza88@gmail.com\");",
+							"});",
+							"",
+							"pm.test(\"User role validation\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.user.role).to.eql(\"STUDENT\");",
+							"});",
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"studentTokenAPI\", jsonData.token);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"email\": \"o.pikuza88@gmail.com\",\n  \"password\": \"Abc234555\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/sign-in",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"sign-in"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "My assignments - (S)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();",
+							"pm.environment.set(\"assignmentID\", jsonData[0].id);",
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{studentTokenAPI}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/my-assignments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"my-assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of Assignments - (T)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{teacherToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/assignments",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Assignment - S",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{studentTokenAPI}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"assignmentId\": {{assignmentID}},\n  \"answers\": [\n    {\n      \"answer\": [\n        0\n      ],\n      \"textAnswer\": \"This is my answer\"\n    },\n      {\n      \"answer\": [\n        2\n      ],\n      \"textAnswer\": \"This is my answer\"\n    },\n      {\n      \"answer\": [\n        0,\n        1,\n        2\n      ],\n      \"textAnswer\": \"This is my answer\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/submit-assignment",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"submit-assignment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Assignment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Check status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"success\");",
+							"});",
+							"",
+							"pm.test(\"Check message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql(\"Assignment was deleted\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{teacherToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/assignment/{{assignmentGroupID}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"assignment",
+						"{{assignmentGroupID}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete quiz",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Check status\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"success\");",
+							"});",
+							"pm.test(\"Check message\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.eql(\"Quiz was deleted\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{teacherToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseUrl}}/quiz/{{quizId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"quiz",
+						"{{quizId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
